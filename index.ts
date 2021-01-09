@@ -3,7 +3,7 @@ const h : number = window.innerHeight
 const parts : number = 3 
 const scGap : number = 0.02 / parts 
 const strokeFactor : number = 90 
-const sizeFactor : number = 8.9 
+const sizeFactor : number = 5.9 
 const delay : number = 20
 const backColor : string = "#bdbdbd"
 const lines : number = 6 
@@ -43,14 +43,15 @@ class DrawingUtil {
         const sc1 : number = ScaleUtil.divideScale(scale, 0, parts)
         const sc2 : number = ScaleUtil.divideScale(scale, 1, parts)
         const sc3 : number = ScaleUtil.divideScale(scale, 2, parts)
-        const size : number = Math.min(w, h) / sizeFactor
+        const size : number = w / sizeFactor
         const gap : number = size / (2 * lines)
+        console.log(gap)
         context.save()
         context.translate(w / 2 - size / 2, h)
         for (var j = 0; j < lines; j++) {
             const sfi : number = ScaleUtil.divideScale(sc2, j, lines)
             context.save()
-            context.translate(gap + gap * j + gap * sfi, 0)
+            context.translate(gap + gap * j + gap * ScaleUtil.sinify(sfi) * 0.5, 0)
             DrawingUtil.drawLine(context, 0, -h * sc3, 0, -h * sc1)
             context.restore()
         }
@@ -112,13 +113,15 @@ class State {
             this.scale = this.prevScale + this.dir
             this.dir = 0 
             this.prevScale = this.scale 
+             
+            console.log("cb", "coming here")
             cb() 
         }
     }
 
     startUpdating(cb : Function) {
         if (this.dir == 0) {
-            this.dir = 1 - 2 * this.prevScale 
+            this.dir = 1 - 2 * this.prevScale
             cb()
         }
     }
@@ -139,6 +142,7 @@ class Animator {
     stop() {
         if (this.animated) {
             this.animated = false 
+            console.log("Stopped animation")
             clearInterval(this.interval)
         }
     }
@@ -150,7 +154,7 @@ class OSLNode {
     next : OSLNode 
     state : State = new State()
 
-    constructor(private i : number) {
+    constructor(public i : number) {
         this.addNeighbor()
     }
 
@@ -178,6 +182,7 @@ class OSLNode {
         if (dir == 1) {
             curr = this.next 
         }
+        console.log("curr",curr)
         if (curr != null) {
             return curr 
         }
@@ -197,9 +202,11 @@ class OscillatingLine {
 
     update(cb : Function) {
         this.curr.update(() => {
+            console.log("stopping here")
             this.curr = this.curr.getNext(this.dir, () => {
                 this.dir *= -1
             })
+            console.log(this.curr.i)
             cb()
         })
     }
@@ -211,7 +218,7 @@ class OscillatingLine {
 
 class Renderer {
 
-    osl : OSLNode = new OSLNode(0)
+    osl : OscillatingLine = new OscillatingLine()
     animator : Animator = new Animator()
 
     render(context : CanvasRenderingContext2D) {
@@ -223,6 +230,7 @@ class Renderer {
             this.animator.start(() => {
                 cb()
                 this.osl.update(() => {
+                    console.log("spp here")
                     this.animator.stop()
                     cb()
                 })
