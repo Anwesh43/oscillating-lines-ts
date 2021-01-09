@@ -46,12 +46,12 @@ class DrawingUtil {
         const size : number = Math.min(w, h) / sizeFactor
         const gap : number = size / (2 * lines)
         context.save()
-        context.translate(0, h)
+        context.translate(w / 2 - size / 2, h)
         for (var j = 0; j < lines; j++) {
             const sfi : number = ScaleUtil.divideScale(sc2, j, lines)
             context.save()
             context.translate(gap + gap * j + gap * sfi, 0)
-            DrawingUtil.drawLine(context, 0, -h * sc3, 0, h * sc1)
+            DrawingUtil.drawLine(context, 0, -h * sc3, 0, -h * sc1)
             context.restore()
         }
         context.restore()
