@@ -6,6 +6,7 @@ const strokeFactor : number = 90
 const sizeFactor : number = 8.9 
 const delay : number = 20
 const backColor : string = "#bdbdbd"
+const lines : number = 6 
 const colors : Array<string> = [
     "#F44336",
     "#2196F3",
@@ -26,5 +27,40 @@ class ScaleUtil {
 
     static sinify(scale : number) : number {
         return Math.sin(scale * Math.PI)
+    }
+}
+
+class DrawingUtil {
+
+    static drawLine(context : CanvasRenderingContext2D, x1 : number, y1 : number, x2 : number, y2 : number) {
+        context.beginPath()
+        context.moveTo(x1, y1)
+        context.lineTo(x2, y2)
+        context.stroke()
+    }
+
+    static drawOscillatingLine(context : CanvasRenderingContext2D, scale : number) {
+        const sc1 : number = ScaleUtil.divideScale(scale, 0, parts)
+        const sc2 : number = ScaleUtil.divideScale(scale, 1, parts)
+        const sc3 : number = ScaleUtil.divideScale(scale, 2, parts)
+        const size : number = Math.min(w, h) / sizeFactor
+        const gap : number = size / (2 * lines)
+        context.save()
+        context.translate(0, h)
+        for (var j = 0; j < lines; j++) {
+            const sfi : number = ScaleUtil.divideScale(sc2, j, lines)
+            context.save()
+            context.translate(gap + gap * j + gap * sfi, 0)
+            DrawingUtil.drawLine(context, 0, -h * sc3, 0, h * sc1)
+            context.restore()
+        }
+        context.restore()
+    }
+
+    static drawOSLNode(context : CanvasRenderingContext2D, i : number, scale : number) {
+        context.lineCap = 'round'
+        context.lineWidth = Math.min(w, h) / strokeFactor 
+        context.strokeStyle = colors[i]
+        DrawingUtil.drawOscillatingLine(context, scale)
     }
 }
