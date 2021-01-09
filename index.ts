@@ -165,7 +165,7 @@ class OSLNode {
         this.state.update(cb)
     }
 
-    startUdapting(cb : Function) {
+    startUpdating(cb : Function) {
         this.state.startUpdating(cb)
     }
 
@@ -179,5 +179,28 @@ class OSLNode {
         }
         cb()
         return this 
+    }
+}
+
+class OscillatingLine {
+
+    curr : OSLNode = new OSLNode(0)
+    dir : number = 1
+
+    draw(context : CanvasRenderingContext2D) {
+        this.curr.draw(context)
+    }
+
+    update(cb : Function) {
+        this.curr.update(() => {
+            this.curr = this.curr.getNext(this.dir, () => {
+                this.dir *= -1
+            })
+            cb()
+        })
+    }
+
+    startUpdating(cb : Function) {
+        this.curr.startUpdating(cb)
     }
 }
