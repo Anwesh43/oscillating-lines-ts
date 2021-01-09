@@ -204,3 +204,25 @@ class OscillatingLine {
         this.curr.startUpdating(cb)
     }
 }
+
+class Renderer {
+
+    osl : OSLNode = new OSLNode(0)
+    animator : Animator = new Animator()
+
+    render(context : CanvasRenderingContext2D) {
+        this.osl.draw(context)
+    }
+
+    handleTap(cb : Function) {
+        this.osl.startUpdating(() => {
+            this.animator.start(() => {
+                cb()
+                this.osl.update(() => {
+                    this.animator.stop()
+                    cb()
+                })
+            })
+        })
+    }
+}
